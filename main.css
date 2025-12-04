@@ -17,7 +17,9 @@ body {
   background-color: var(--bg-dark);
   color: var(--text-light);
   font-family: 'Manrope', sans-serif;
-  overflow: hidden; /* Lenis handles scrolling */
+  /* Allow vertical scroll, prevent sideways wiggle */
+  overflow-x: hidden;
+  overflow-y: auto;
   cursor: none; /* default for precise pointers */
 }
 
@@ -402,3 +404,4 @@ a:focus-visible,
 button:focus-visible {
   border-radius: 4px;
 }
+
