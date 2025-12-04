@@ -894,8 +894,8 @@ function init3D() {
 
       // Small vertical influence from scroll, clamped so it never flies off-screen
       // Small vertical influence from scroll, clamped so it never flies off-screen
-const scrollTilt = THREE.MathUtils.clamp(scrollVelocity * 0.05, -1.5, 1.5);
-const midY = -2.5; // move plane slightly lower on screen (tweak this value)
+const scrollTilt = THREE.MathUtils.clamp(scrollVelocity * 0.05, -1.0, 1.0);
+const midY = -5.5; // move plane slightly lower on screen (tweak this value)
 
 target.set(
   position.x * 0.98,
@@ -981,6 +981,7 @@ window.addEventListener('load', () => {
   schedule3DInit();
   ScrollTrigger.refresh();
 });
+
 
 
 
