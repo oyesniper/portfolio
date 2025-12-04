@@ -14,6 +14,10 @@ const CONFIG = {
     careerSpeedMultiplier: 3,
     skillsSpeedMultiplier: 2,
     horizontalSpeedMultiplier: 3
+  },
+  flight: {
+    baseSpeed: 1.0,      // base speed of the loop
+    scrollBoost: 1.5     // how much scroll can speed it up
   }
 };
 
@@ -943,5 +947,3 @@ window.addEventListener('load', () => {
   schedule3DInit();
   ScrollTrigger.refresh();
 });
-
-
