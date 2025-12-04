@@ -854,67 +854,69 @@ function init3D() {
     scrollVelocity += (rawVel - scrollVelocity) * 0.1;
     lastScrollY = currentScrollY;
 
-    if (!isIntroAnimating) {
-      const timeSinceInput = Date.now() - lastInputTime;
-      const isIdle = timeSinceInput > 2000;
+   if (!isIntroAnimating) {
+  const timeSinceInput = Date.now() - lastInputTime;
+  const isIdle = timeSinceInput > 2000;
 
-      let maxSpeed;
-      let maxForce;
+  let maxSpeed;
+  let maxForce;
 
-      if (isIdle) {
-        // 🔹 IDLE: smooth looping path (same as before)
-        maxSpeed = CONFIG.physics.idleMaxSpeed;
-        maxForce = CONFIG.physics.idleMaxForce;
+  if (isIdle) {
+    // IDLE: smooth looping flight
+    maxSpeed = CONFIG.physics.idleMaxSpeed;
+    maxForce = CONFIG.physics.idleMaxForce;
 
-        const patternForce = flightPattern(time, maxSpeed, maxForce);
-        applyForce(patternForce);
+    const patternForce = flightPattern(time, maxSpeed, maxForce);
+    applyForce(patternForce);
 
-        const boundaryForce = boundaries(2.0, maxSpeed, 0.02);
-        applyForce(boundaryForce);
-      } else {
-        // 🔹 ACTIVE: user recently moved mouse or scrolled
+    const boundaryForce = boundaries(2.0, maxSpeed, 0.02);
+    applyForce(boundaryForce);
+  } else {
+    // ACTIVE: user recently moved mouse or scrolled
+    maxSpeed = CONFIG.physics.activeMaxSpeed;
+    maxForce = CONFIG.physics.activeMaxForce;
 
-        // Base speed from idle → active
-        const scrollAmount = Math.min(
-          1,
-          Math.abs(scrollVelocity) / 40
-        ); // 0..1
-        maxSpeed =
-          CONFIG.physics.idleMaxSpeed +
-          (CONFIG.physics.activeMaxSpeed - CONFIG.physics.idleMaxSpeed) *
-            scrollAmount;
-        maxForce =
-          CONFIG.physics.idleMaxForce +
-          (CONFIG.physics.activeMaxForce - CONFIG.physics.idleMaxForce) *
-            scrollAmount;
+    let target = new THREE.Vector3();
 
-        // 1) Always follow the smooth flight pattern
-        const patternForce = flightPattern(time, maxSpeed, maxForce);
-        applyForce(patternForce);
+    if (isMouseMoving) {
+      // 🔹 SAME AS BEFORE: follow cursor strongly
+      target.set(
+        (mouse.x - 0.5) * 16,
+        -(mouse.y - 0.5) * 10,
+        0
+      );
+    } else {
+      // 🔹 SCROLLING: keep plane near center, with only a *small* vertical tilt
 
-        // 2) If mouse is moving, gently follow cursor (like before)
-        if (isMouseMoving) {
-          const mouseTarget = new THREE.Vector3(
-            (mouse.x - 0.5) * 16,
-            -(mouse.y - 0.5) * 10,
-            0
-          );
-          const mouseForce = seek(mouseTarget, maxSpeed, maxForce);
-          applyForce(mouseForce);
-        }
+      const scrollPercent =
+        currentScrollY / (document.body.scrollHeight - window.innerHeight);
+      const depthZ = -scrollPercent * 10.0; // keep your nice depth effect
 
-        // 3) Keep plane safely on screen
-        const safetyForce = boundaries(1.0, maxSpeed * 1.2, 0.05);
-        applyForce(safetyForce);
-      }
+      // Small vertical influence from scroll, clamped so it never flies off-screen
+      const scrollTilt = THREE.MathUtils.clamp(scrollVelocity * 0.05, -1.5, 1.5);
+      const midY = 0; // center of screen in world space
 
-      // Physics integration
-      velocity.add(acceleration);
-      velocity.clampLength(0, maxSpeed);
-      position.add(velocity);
-      acceleration.multiplyScalar(0);
+      target.set(
+        position.x * 0.98, // slight damping in X so it doesn't drift forever
+        midY + scrollTilt, // always stay around center, just tilt a bit
+        depthZ
+      );
     }
 
+    const seekForce = seek(target, maxSpeed, maxForce);
+    applyForce(seekForce);
+
+    const safetyForce = boundaries(1.0, maxSpeed * 1.5, 0.05);
+    applyForce(safetyForce);
+  }
+
+  // Physics integration
+  velocity.add(acceleration);
+  velocity.clampLength(0, maxSpeed);
+  position.add(velocity);
+  acceleration.multiplyScalar(0);
+}
+    
     planeGroup.position.copy(position);
 
     if (velocity.lengthSq() > 0.00001) {
@@ -977,3 +979,4 @@ window.addEventListener('load', () => {
   schedule3DInit();
   ScrollTrigger.refresh();
 });
+
