@@ -844,9 +844,11 @@ function init3D() {
   function animate() {
     const time = clock.getElapsedTime();
 
+    // Update shader
     bgMaterial.uniforms.uTime.value = time;
     bgMaterial.uniforms.uMouse.value = mouse;
 
+    // Scroll "speed" (but no longer used to pull the plane up/down)
     const currentScrollY = window.scrollY;
     const rawVel = currentScrollY - lastScrollY;
     scrollVelocity += (rawVel - scrollVelocity) * 0.1;
@@ -860,6 +862,7 @@ function init3D() {
       let maxForce;
 
       if (isIdle) {
+        // 🔹 IDLE: smooth looping path (same as before)
         maxSpeed = CONFIG.physics.idleMaxSpeed;
         maxForce = CONFIG.physics.idleMaxForce;
 
@@ -869,36 +872,43 @@ function init3D() {
         const boundaryForce = boundaries(2.0, maxSpeed, 0.02);
         applyForce(boundaryForce);
       } else {
-        maxSpeed = CONFIG.physics.activeMaxSpeed;
-        maxForce = CONFIG.physics.activeMaxForce;
+        // 🔹 ACTIVE: user recently moved mouse or scrolled
 
-        let target = new THREE.Vector3();
+        // Base speed from idle → active
+        const scrollAmount = Math.min(
+          1,
+          Math.abs(scrollVelocity) / 40
+        ); // 0..1
+        maxSpeed =
+          CONFIG.physics.idleMaxSpeed +
+          (CONFIG.physics.activeMaxSpeed - CONFIG.physics.idleMaxSpeed) *
+            scrollAmount;
+        maxForce =
+          CONFIG.physics.idleMaxForce +
+          (CONFIG.physics.activeMaxForce - CONFIG.physics.idleMaxForce) *
+            scrollAmount;
 
+        // 1) Always follow the smooth flight pattern
+        const patternForce = flightPattern(time, maxSpeed, maxForce);
+        applyForce(patternForce);
+
+        // 2) If mouse is moving, gently follow cursor (like before)
         if (isMouseMoving) {
-          target.set(
+          const mouseTarget = new THREE.Vector3(
             (mouse.x - 0.5) * 16,
             -(mouse.y - 0.5) * 10,
             0
           );
-        } else {
-          const scrollPercent =
-            currentScrollY / (document.body.scrollHeight - window.innerHeight);
-          const depthZ = -scrollPercent * 10.0;
-
-          target.set(
-            position.x * 0.95,
-            position.y - scrollVelocity * 2.0,
-            depthZ
-          );
+          const mouseForce = seek(mouseTarget, maxSpeed, maxForce);
+          applyForce(mouseForce);
         }
 
-        const seekForce = seek(target, maxSpeed, maxForce);
-        applyForce(seekForce);
-
-        const safetyForce = boundaries(1.0, maxSpeed * 1.5, 0.05);
+        // 3) Keep plane safely on screen
+        const safetyForce = boundaries(1.0, maxSpeed * 1.2, 0.05);
         applyForce(safetyForce);
       }
 
+      // Physics integration
       velocity.add(acceleration);
       velocity.clampLength(0, maxSpeed);
       position.add(velocity);
