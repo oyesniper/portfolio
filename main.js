@@ -745,14 +745,12 @@ function init3D() {
 
   let isMouseMoving = false;
   let isScrolling = false;
-  let lastInputTime = Date.now();
   let scrollVelocity = 0;
   let lastScrollY = window.scrollY;
   let mouseStopTimeout;
 
   window.addEventListener('mousemove', () => {
     isMouseMoving = true;
-    lastInputTime = Date.now();
     clearTimeout(mouseStopTimeout);
     mouseStopTimeout = setTimeout(() => {
       isMouseMoving = false;
@@ -761,7 +759,6 @@ function init3D() {
 
   window.addEventListener('scroll', () => {
     isScrolling = true;
-    lastInputTime = Date.now();
     clearTimeout(window.scrollTimeout);
     window.scrollTimeout = setTimeout(() => (isScrolling = false), 150);
   });
@@ -802,12 +799,13 @@ function init3D() {
     return steer;
   }
 
+  // Figure-8 flight path around center
   function flightPattern(time, maxSpeed, maxForce) {
     const t = time * 0.4;
     const target = new THREE.Vector3(
-      Math.sin(t) * 7.0,
-      Math.sin(t * 2.0) * 3.5,
-      Math.cos(t) * 6.0 - 4.0
+      Math.sin(t) * 5.0,          // a bit tighter horizontally
+      Math.sin(t * 2.0) * 2.5,    // a bit tighter vertically
+      Math.cos(t) * 4.0 - 4.0     // around z ≈ -4
     );
     return seek(target, maxSpeed, maxForce);
   }
@@ -844,49 +842,68 @@ function init3D() {
   }
 
   const clock = new THREE.Clock();
+  let shaderTime = 0;
+  let flightTime = 0;
 
+  function animate() {
+    const dt = clock.getDelta();
+    shaderTime += dt;
+
+    // Update BG Shader
+    bgMaterial.uniforms.uTime.value = shaderTime;
+    bgMaterial.uniforms.uMouse.value = mouse;
+
+    // Scroll data only used for speed, not position
+    const currentScrollY = window.scrollY;
+    const rawVel = currentScrollY - lastScrollY;
+    scrollVelocity += (rawVel - scrollVelocity) * 0.2; // smooth scroll velocity
+    lastScrollY = currentScrollY;
+
+    const normalizedScroll = Math.min(
+      1,
+      Math.abs(scrollVelocity) / 40
+    ); // tune divisor if needed
+    const speedFactor =
+      1 + CONFIG.flight.scrollBoost * normalizedScroll; // 1..(1+scrollBoost)
+
+    // Advance flight time based on scroll-influenced speed
+    flightTime += dt * CONFIG.flight.baseSpeed * speedFactor;
+
+    // --- PHYSICS ENGINE ---
     if (!isIntroAnimating) {
-    // We only care if mouse is moving or not
-    let maxSpeed, maxForce;
+      let maxSpeed = CONFIG.physics.idleMaxSpeed;
+      let maxForce = CONFIG.physics.idleMaxForce;
 
-    if (!isMouseMoving) {
-      // Idle: smooth looping flight near center
-      maxSpeed = CONFIG.physics.idleMaxSpeed;
-      maxForce = CONFIG.physics.idleMaxForce;
-    } else {
-      // Mouse interaction: a bit more responsive, but still smooth
-      maxSpeed = CONFIG.physics.activeMaxSpeed;
-      maxForce = CONFIG.physics.activeMaxForce;
+      // 1) Base looping flight around center
+      const patternForce = flightPattern(flightTime, maxSpeed, maxForce);
+      applyForce(patternForce);
+
+      // 2) Gentle steering to mouse when moving
+      if (isMouseMoving) {
+        const mouseTarget = new THREE.Vector3(
+          (mouse.x - 0.5) * 6,   // small influence horizontally
+          -(mouse.y - 0.5) * 3,  // small influence vertically
+          0
+        );
+        const mouseForce = seek(mouseTarget, maxSpeed, maxForce * 0.5);
+        applyForce(mouseForce);
+      }
+
+      // 3) Soft boundaries so it stays on-screen
+      const safetyForce = boundaries(1.0, maxSpeed * 1.2, 0.05);
+      applyForce(safetyForce);
+
+      // 4) Integrate physics
+      velocity.add(acceleration);
+      velocity.clampLength(0, maxSpeed);
+      position.add(velocity);
+      acceleration.multiplyScalar(0);
     }
 
-    // 1) Always follow the smooth figure-8 flight pattern (center-ish)
-    const patternForce = flightPattern(time, maxSpeed, maxForce);
-    applyForce(patternForce);
-
-    // 2) If mouse is moving, add a *gentle* steering towards mouse
-    if (isMouseMoving) {
-      const mouseTarget = new THREE.Vector3(
-        (mouse.x - 0.5) * 6,   // reduced influence vs before
-        -(mouse.y - 0.5) * 3,  // small vertical influence
-        0
-      );
-      const mouseForce = seek(mouseTarget, maxSpeed, maxForce * 0.5);
-      applyForce(mouseForce);
-    }
-
-    // 3) Keep the plane within a soft boundary box (so it stays on screen)
-    const safetyForce = boundaries(1.0, maxSpeed * 1.2, 0.05);
-    applyForce(safetyForce);
-
-    // 4) Integrate physics
-    velocity.add(acceleration);
-    velocity.clampLength(0, maxSpeed);
-    position.add(velocity);
-    acceleration.multiplyScalar(0);
-  }
-
+    // UPDATE VISUALS
     planeGroup.position.copy(position);
 
+    // Orientation / banking
     if (velocity.lengthSq() > 0.00001) {
       const targetQuaternion = new THREE.Quaternion();
       const lookMatrix = new THREE.Matrix4();
@@ -947,4 +964,3 @@ window.addEventListener('load', () => {
   schedule3DInit();
   ScrollTrigger.refresh();
 });
-
