@@ -98,7 +98,12 @@ function revealSite() {
 }
 
 // --- 2. SMOOTH SCROLL (LENIS) ---
-if (typeof Lenis !== 'undefined') {
+// Disable Lenis on coarse pointer devices (most smartphones / tablets)
+const isCoarsePointer =
+  window.matchMedia &&
+  window.matchMedia('(pointer: coarse)').matches;
+
+if (typeof Lenis !== 'undefined' && !isCoarsePointer) {
   const lenis = new Lenis({
     duration: 1.2,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -117,8 +122,9 @@ if (typeof Lenis !== 'undefined') {
   });
   gsap.ticker.lagSmoothing(0);
 } else {
-  console.warn('Lenis library not loaded. Smooth scrolling disabled.');
-  document.body.style.overflow = 'auto';
+  console.warn('Lenis disabled on this device (coarse pointer or not loaded). Using native scroll.');
+  // Make absolutely sure scrolling works
+  document.body.style.overflowY = 'auto';
 }
 
 // --- 3. HEADER BLUR ON SCROLL ---
@@ -961,3 +967,4 @@ window.addEventListener('load', () => {
   schedule3DInit();
   ScrollTrigger.refresh();
 });
+
