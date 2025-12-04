@@ -841,77 +841,45 @@ function init3D() {
 
   const clock = new THREE.Clock();
 
-  function animate() {
-    const time = clock.getElapsedTime();
-
-    bgMaterial.uniforms.uTime.value = time;
-    bgMaterial.uniforms.uMouse.value = mouse;
-
-    const currentScrollY = window.scrollY;
-    const rawVel = currentScrollY - lastScrollY;
-    scrollVelocity += (rawVel - scrollVelocity) * 0.1;
-    lastScrollY = currentScrollY;
-
     if (!isIntroAnimating) {
-      const timeSinceInput = Date.now() - lastInputTime;
-      const isIdle = timeSinceInput > 2000;
+    // We only care if mouse is moving or not
+    let maxSpeed, maxForce;
 
-      let maxSpeed;
-      let maxForce;
-
-      if (isIdle) {
-        maxSpeed = CONFIG.physics.idleMaxSpeed;
-        maxForce = CONFIG.physics.idleMaxForce;
-
-        const patternForce = flightPattern(time, maxSpeed, maxForce);
-        applyForce(patternForce);
-
-        const boundaryForce = boundaries(2.0, maxSpeed, 0.02);
-        applyForce(boundaryForce);
-      } else {
-        maxSpeed = CONFIG.physics.activeMaxSpeed;
-        maxForce = CONFIG.physics.activeMaxForce;
-
-        let target = new THREE.Vector3();
-
-        if (isMouseMoving) {
-          // Follow Mouse (same as before)
-          target.set(
-            (mouse.x - 0.5) * 16,
-            -(mouse.y - 0.5) * 10,
-            0
-          );
-        } else {
-          // Scroll Influence (much smoother, stays around middle)
-          const scrollPercent =
-            currentScrollY / (document.body.scrollHeight - window.innerHeight || 1);
-
-          // Limit depth change so it doesn't feel too wild
-          const depthZ = THREE.MathUtils.lerp(-2, -10, scrollPercent);
-
-          // Slowly bring Y toward center (0), with a *very* gentle scroll influence
-          const targetYBase = THREE.MathUtils.lerp(position.y, 0, 0.05);
-          const targetYWithScroll = targetYBase - scrollVelocity * 0.05;
-          const clampedY = THREE.MathUtils.clamp(targetYWithScroll, -2.5, 2.5);
-
-          // X gently recenters too (subtle)
-          const targetX = THREE.MathUtils.lerp(position.x, 0, 0.02);
-
-          target.set(targetX, clampedY, depthZ);
-        }
-
-        const seekForce = seek(target, maxSpeed, maxForce);
-        applyForce(seekForce);
-
-        const safetyForce = boundaries(1.0, maxSpeed * 1.5, 0.05);
-        applyForce(safetyForce);
-      }
-
-      velocity.add(acceleration);
-      velocity.clampLength(0, maxSpeed);
-      position.add(velocity);
-      acceleration.multiplyScalar(0);
+    if (!isMouseMoving) {
+      // Idle: smooth looping flight near center
+      maxSpeed = CONFIG.physics.idleMaxSpeed;
+      maxForce = CONFIG.physics.idleMaxForce;
+    } else {
+      // Mouse interaction: a bit more responsive, but still smooth
+      maxSpeed = CONFIG.physics.activeMaxSpeed;
+      maxForce = CONFIG.physics.activeMaxForce;
     }
+
+    // 1) Always follow the smooth figure-8 flight pattern (center-ish)
+    const patternForce = flightPattern(time, maxSpeed, maxForce);
+    applyForce(patternForce);
+
+    // 2) If mouse is moving, add a *gentle* steering towards mouse
+    if (isMouseMoving) {
+      const mouseTarget = new THREE.Vector3(
+        (mouse.x - 0.5) * 6,   // reduced influence vs before
+        -(mouse.y - 0.5) * 3,  // small vertical influence
+        0
+      );
+      const mouseForce = seek(mouseTarget, maxSpeed, maxForce * 0.5);
+      applyForce(mouseForce);
+    }
+
+    // 3) Keep the plane within a soft boundary box (so it stays on screen)
+    const safetyForce = boundaries(1.0, maxSpeed * 1.2, 0.05);
+    applyForce(safetyForce);
+
+    // 4) Integrate physics
+    velocity.add(acceleration);
+    velocity.clampLength(0, maxSpeed);
+    position.add(velocity);
+    acceleration.multiplyScalar(0);
+  }
 
     planeGroup.position.copy(position);
 
@@ -975,5 +943,6 @@ window.addEventListener('load', () => {
   schedule3DInit();
   ScrollTrigger.refresh();
 });
+
 
 
