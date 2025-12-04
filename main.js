@@ -893,14 +893,16 @@ function init3D() {
       const depthZ = -scrollPercent * 10.0; // keep your nice depth effect
 
       // Small vertical influence from scroll, clamped so it never flies off-screen
-      const scrollTilt = THREE.MathUtils.clamp(scrollVelocity * 0.05, -1.5, 1.5);
-      const midY = 0; // center of screen in world space
+      // Small vertical influence from scroll, clamped so it never flies off-screen
+const scrollTilt = THREE.MathUtils.clamp(scrollVelocity * 0.05, -1.5, 1.5);
+const midY = -1.2; // move plane slightly lower on screen (tweak this value)
 
-      target.set(
-        position.x * 0.98, // slight damping in X so it doesn't drift forever
-        midY + scrollTilt, // always stay around center, just tilt a bit
-        depthZ
-      );
+target.set(
+  position.x * 0.98,
+  midY + scrollTilt,
+  depthZ
+);
+
     }
 
     const seekForce = seek(target, maxSpeed, maxForce);
@@ -979,4 +981,5 @@ window.addEventListener('load', () => {
   schedule3DInit();
   ScrollTrigger.refresh();
 });
+
 
