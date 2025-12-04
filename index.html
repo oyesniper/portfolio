@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Rajat Singh | Graphic Designer</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Rajat Singh is a graphic designer based in India, specializing in political campaigns, brand identity, and digital visuals." />
+  <meta name="keywords" content="Rajat Singh, graphic designer, political design, campaign creatives, brand identity, visual communication, India" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Rajat Singh | Graphic Designer" />
+  <meta property="og:description" content="Selected works in campaign design, branding, and visual communication." />
+  <meta property="og:image" content="URL_TO_A_PREVIEW_IMAGE.jpg" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://your-portfolio-url.com" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Rajat Singh | Graphic Designer" />
+  <meta name="twitter:description" content="Selected works in campaign design, branding, and visual communication." />
+  <meta name="twitter:image" content="URL_TO_A_PREVIEW_IMAGE.jpg" />
+
+  <!-- Tailwind CSS (Styling) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts (Manrope for UI, Oswald for Display) -->
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Oswald:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- External stylesheet -->
+  <link rel="stylesheet" href="main.css" />
+
+  <!-- Libraries (with defer) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+
+  <!-- Your main JS file -->
+  <script src="main.js" defer></script>
+</head>
+
+<body>
+  <!-- CUSTOM CURSOR -->
+  <div id="cursor"></div>
+
+  <!-- PRELOADER -->
+  <div class="preloader">
+    <div class="font-display text-4xl tracking-widest font-bold text-white" id="counter">0%</div>
+    <div class="loader-bar"><div class="loader-progress"></div></div>
+  </div>
+
+  <!-- BACKGROUND LAYERS -->
+  <!-- Layer 1: Abstract Background (Behind Everything) -->
+  <div id="canvas-container"></div>
+  <!-- Layer 2: Floating Feather / Plane (Above Content) -->
+  <div id="feather-container"></div>
+
+  <!-- NAVIGATION (Pro Sticky Header) -->
+  <nav class="fixed top-0 left-0 w-full px-8 md:px-12 z-50">
+    <div class="nav-content group">
+      <!-- Dynamic Name -->
+      <div class="header-title-container">
+        <span class="header-title-text font-display" id="dynamic-header">RAJAT SINGH</span>
+      </div>
+    </div>
+
+    <!-- Global Progress Bar (The "Border") -->
+    <div class="global-progress-container">
+      <div class="global-progress-bar" id="page-progress"></div>
+    </div>
+  </nav>
+
+  <!-- CONTENT WRAPPER -->
+  <div id="smooth-wrapper">
+    <div id="smooth-content">
+      <!-- HERO SECTION -->
+      <section id="hero" class="h-screen w-full flex flex-col justify-center px-6 md:px-20 relative pt-20">
+        <div class="line-mask mb-2">
+          <span class="hero-line font-display text-[13vw] leading-[0.8] tracking-tighter mix-blend-overlay">DIGITAL</span>
+        </div>
+        <div class="line-mask mb-2 ml-[10vw]">
+          <span class="hero-line font-display text-[13vw] leading-[0.8] tracking-tighter text-white mix-blend-difference">DESIGN</span>
+        </div>
+        <div class="line-mask">
+          <span class="hero-line font-display text-[13vw] leading-[0.8] tracking-tighter opacity-50 stroke-text">EXPERIENCE</span>
+        </div>
+
+        <div class="absolute bottom-12 right-6 md:right-20 max-w-sm text-right">
+          <p class="text-xs md:text-sm text-gray-400 leading-relaxed hero-fade opacity-0 translate-y-4">
+            Creative and detail-oriented Graphic Designer with 3+ years of experience.
+            Based in India, globally available.
+          </p>
+          <div class="mt-8 flex justify-end hero-fade opacity-0">
+            <div class="w-6 h-10 border border-[#7de2d1] rounded-full flex justify-center pt-2">
+              <div class="w-1 h-1 bg-white rounded-full animate-bounce"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- INTRO SECTION -->
+      <section id="intro" class="min-h-screen w-full bg-[#131515] relative z-10 pt-10">
+        <div class="w-full px-5">
+          <!-- Label -->
+          <div class="mb-2">
+            <span class="section-label text-xs font-bold uppercase tracking-[0.2em] text-[#339989] block mb-2 inline-block origin-left">Introduction</span>
+            <div class="w-12 h-[1px] bg-[#fffafb] opacity-50"></div>
+          </div>
+
+          <!-- Heading -->
+          <h2 class="font-display text-5xl md:text-7xl mb-6 text-[#fffafb] leading-tight uppercase">Hello, I'm Rajat.</h2>
+
+          <!-- Intro Text -->
+          <div class="w-full intro-text">
+            <p class="reveal-type text-[#7de2d1] font-light mb-6 text-lg md:text-2xl leading-relaxed">
+              I am a Creative Graphic Designer creating visually compelling assets. Proven ability to communicate brand messages effectively and leave a lasting impact on audiences through digital and print media.
+            </p>
+
+            <p class="reveal-type text-[#7de2d1] font-light text-lg md:text-2xl leading-relaxed">
+              Skilled in Adobe Creative Suite, Figma, and emerging AI design tools. I provide end-to-end design solutions, from Brand Identity to complex Visual Communication strategies.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- EXPERIENCE SECTION -->
+      <section id="experience" class="career-section relative z-10 bg-[#fffafb] border-t border-[#2b2c28]/10">
+        <div class="career-content-block">
+          <div class="w-full px-6 md:px-20">
+            <span class="section-label text-xs font-bold uppercase tracking-[0.2em] text-[#339989] block mb-2 inline-block">Experience</span>
+            <h2 class="font-display text-6xl md:text-8xl text-[#131515]">CAREER PATH</h2>
+          </div>
+
+          <!-- Progress Track -->
+          <div class="w-full h-[2px] bg-[#2b2c28]/20 relative mt-8 mb-4 overflow-hidden">
+            <div class="career-progress-bar absolute top-0 left-0 h-full bg-[#131515] w-0 shadow-[0_0_15px_rgba(0,0,0,0.2)]"></div>
+          </div>
+
+          <!-- Horizontal Scroll Container -->
+          <div class="career-timeline-wrapper overflow-hidden w-full">
+            <div class="career-timeline-container flex">
+              <!-- Role 1 -->
+              <div class="career-node">
+                <div class="border-l border-[#2b2c28]/30 pl-6 py-2">
+                  <span class="text-xs text-[#339989] uppercase tracking-widest block mb-2 font-bold whitespace-nowrap">2023 — Present</span>
+                  <h3 class="font-display text-4xl md:text-5xl text-[#131515] mb-2">POLLXPERTS</h3>
+                  <p class="text-lg text-[#2b2c28] mb-4 font-medium">Graphic Designer / Delhi</p>
+                  <ul class="text-sm text-[#2b2c28]/80 space-y-2 list-disc list-inside leading-relaxed">
+                    <li>End-to-end design for political consulting.</li>
+                    <li>Visual identity for 7+ major clients.</li>
+                    <li>Print collateral & merchandise design.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Role 2 -->
+              <div class="career-node">
+                <div class="border-l border-[#2b2c28]/30 pl-6 py-2">
+                  <span class="text-xs text-[#339989] uppercase tracking-widest block mb-2 font-bold whitespace-nowrap">2022 — 2023</span>
+                  <h3 class="font-display text-4xl md:text-5xl text-[#131515] mb-2">DESIGN AVENUE</h3>
+                  <p class="text-lg text-[#2b2c28] mb-4 font-medium">Graphic Designer / Mumbai</p>
+                  <ul class="text-sm text-[#2b2c28]/80 space-y-2 list-disc list-inside leading-relaxed">
+                    <li>Visual assets for IT Services & Consulting.</li>
+                    <li>UI elements for web & mobile apps.</li>
+                    <li>Product packaging & brand assets.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Education -->
+              <div class="career-node">
+                <div class="border-l border-[#2b2c28]/30 pl-6 py-2">
+                  <span class="text-xs text-[#339989] uppercase tracking-widest block mb-2 font-bold whitespace-nowrap">2018 — 2024</span>
+                  <h3 class="font-display text-4xl md:text-5xl text-[#131515] mb-2">EDUCATION</h3>
+                  <p class="text-lg text-[#2b2c28] mb-4 font-medium">MBA & B.Sc.</p>
+                  <ul class="text-sm text-[#2b2c28]/80 space-y-2 list-disc list-inside leading-relaxed">
+                    <li>MBA - Barkatullah University (2022-24)</li>
+                    <li>B.Sc. - Allahabad State University (2018-21)</li>
+                  </ul>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SKILLS SECTION -->
+      <section id="skills" class="skills-section relative z-10 bg-[#131515] border-t border-[#2b2c28]">
+        <div class="skills-content-block">
+          <div class="w-full px-6 md:px-20">
+            <span class="section-label text-xs font-bold uppercase tracking-[0.2em] text-[#339989] block mb-2 inline-block">SKILLS</span>
+            <h2 class="font-display text-6xl md:text-8xl text-[#fffafb]">TOOLS</h2>
+          </div>
+
+          <!-- Progress Track -->
+          <div class="w-full h-[2px] bg-[#2b2c28] relative mt-8 mb-4 overflow-hidden">
+            <div class="skills-progress-bar absolute top-0 left-0 h-full bg-[#fffafb] w-0 shadow-[0_0_15px_rgba(255,255,255,0.8)]"></div>
+          </div>
+
+          <!-- Horizontal Scroll Container -->
+          <div class="skills-timeline-wrapper overflow-hidden w-full">
+            <div class="skills-timeline-container flex">
+              <!-- Design -->
+              <div class="skills-node">
+                <div class="border-l border-[#2b2c28] pl-6 py-2">
+                  <span class="text-xs text-[#339989] uppercase tracking-widest block mb-2">Core</span>
+                  <h3 class="font-display text-4xl md:text-5xl text-[#fffafb] mb-2">DESIGN</h3>
+                  <ul class="text-sm text-[#7de2d1] space-y-1 list-disc list-inside mt-4">
+                    <li>Adobe Photoshop</li>
+                    <li>Adobe Illustrator</li>
+                    <li>Figma (UI/UX)</li>
+                    <li>CorelDraw</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Video -->
+              <div class="skills-node">
+                <div class="border-l border-[#2b2c28] pl-6 py-2">
+                  <span class="text-xs text-[#339989] uppercase tracking-widest block mb-2">Motion</span>
+                  <h3 class="font-display text-4xl md:text-5xl text-[#fffafb] mb-2">VIDEO</h3>
+                  <ul class="text-sm text-[#7de2d1] space-y-1 list-disc list-inside mt-4">
+                    <li>Adobe Premiere Pro</li>
+                    <li>Adobe Lightroom</li>
+                    <li>After Effects</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Strategy -->
+              <div class="skills-node">
+                <div class="border-l border-[#2b2c28] pl-6 py-2">
+                  <span class="text-xs text-[#339989] uppercase tracking-widest block mb-2">Strategy</span>
+                  <h3 class="font-display text-4xl md:text-5xl text-[#fffafb] mb-2">OTHER</h3>
+                  <ul class="text-sm text-[#7de2d1] space-y-1 list-disc list-inside mt-4">
+                    <li>AI Design Tools</li>
+                    <li>Brand Identity</li>
+                    <li>Visual Communication</li>
+                  </ul>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SHOWCASE (HORIZONTAL) -->
+      <section id="showcase" class="horizontal-section relative">
+        <!-- Centered Title -->
+        <div class="absolute top-[60px] left-0 w-full flex justify-center z-30 pointer-events-none">
+          <div class="fill-text-wrapper font-display text-xl uppercase tracking-[0.3em] font-bold">
+            SELECTED WORKS
+            <div class="fill-text-overlay">SELECTED WORKS</div>
+          </div>
+        </div>
+
+        <div class="horizontal-wrapper" style="width: 400%;">
+          <!-- Panel 1 -->
+          <div class="panel">
+            <div class="flex flex-col md:flex-row items-center max-w-6xl w-full gap-20 mt-12">
+              <div class="w-full md:w-1/2 flex justify-center md:justify-start">
+                <img src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1000&auto=format&fit=crop" class="panel-img rounded-2xl" alt="Election 2024 campaign visual identity" loading="lazy" />
+              </div>
+              <div class="w-full md:w-1/2">
+                <span class="text-xs text-[#339989] tracking-widest uppercase mb-4 block">01 — Campaign</span>
+                <h2 class="font-display text-6xl md:text-7xl mb-6 text-[#fffafb]">ELECTION<br>2024</h2>
+                <p class="text-[#7de2d1] max-w-md">Comprehensive visual identity. Banners, posters, and digital assets.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 2 -->
+          <div class="panel">
+            <div class="flex flex-col md:flex-row-reverse items-center max-w-6xl w-full gap-20 mt-12">
+              <div class="w-full md:w-1/2 flex justify-center md:justify-start">
+                <img src="https://images.unsplash.com/photo-1633613286991-611fe299c4be?q=80&w=1000&auto=format&fit=crop" class="panel-img rounded-2xl" alt="Tech rebrand visual concept" loading="lazy" />
+              </div>
+              <div class="w-full md:w-1/2 text-right md:text-left">
+                <span class="text-xs text-[#339989] tracking-widest uppercase mb-4 block">02 — Branding</span>
+                <h2 class="font-display text-6xl md:text-7xl mb-6 text-[#fffafb]">TECH<br>REBRAND</h2>
+                <p class="text-[#7de2d1] max-w-md">Corporate identity overhaul. Logo, stationery, and guidelines.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 3 -->
+          <div class="panel">
+            <div class="flex flex-col md:flex-row items-center max-w-6xl w-full gap-20 mt-12">
+              <div class="w-full md:w-1/2 flex justify-center md:justify-end">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop" class="panel-img rounded-2xl" alt="Social media carousel and digital creatives" loading="lazy" />
+              </div>
+              <div class="w-full md:w-1/2">
+                <span class="text-xs text-[#339989] tracking-widest uppercase mb-4 block">03 — Digital</span>
+                <h2 class="font-display text-6xl md:text-7xl mb-6 text-[#fffafb]">SOCIAL<br>SUITE</h2>
+                <p class="text-[#7de2d1] max-w-md">High-engagement carousel designs and event creatives.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 4 -->
+          <div class="panel">
+            <div class="flex flex-col md:flex-row-reverse items-center max-w-6xl w-full gap-20 mt-12">
+              <div class="w-full md:w-1/2 flex justify-center md:justify-start">
+                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop" class="panel-img rounded-2xl" alt="Product packaging and labels" loading="lazy" />
+              </div>
+              <div class="w-full md:w-1/2 text-right md:text-left">
+                <span class="text-xs text-[#339989] tracking-widest uppercase mb-4 block">04 — Print</span>
+                <h2 class="font-display text-6xl md:text-7xl mb-6 text-[#fffafb]">PRODUCT<br>PACKAGING</h2>
+                <p class="text-[#7de2d1] max-w-md">Tangible brand assets including labels and packaging.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-progress-container">
+          <div class="section-progress-bar"></div>
+        </div>
+      </section>
+
+      <!-- ARCHIVE (HORIZONTAL) -->
+      <section id="work" class="horizontal-section relative">
+        <!-- Centered Title -->
+        <div class="absolute top-[60px] left-0 w-full flex justify-center z-30 pointer-events-none">
+          <div class="fill-text-wrapper font-display text-xl uppercase tracking-[0.3em] font-bold">
+            ARCHIVE
+            <div class="fill-text-overlay">ARCHIVE</div>
+          </div>
+        </div>
+
+        <div class="horizontal-wrapper" style="width: 300%;">
+          <!-- Work 1 -->
+          <div class="panel">
+            <div class="flex flex-col md:flex-row items-center max-w-6xl w-full gap-20 mt-12">
+              <div class="w-full md:w-1/2 flex justify-center md:justify-start">
+                <img src="https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=1000&auto=format&fit=crop" class="panel-img rounded-2xl" alt="Print collateral: brochures and flyers" loading="lazy" />
+              </div>
+              <div class="w-full md:w-1/2">
+                <span class="text-xs text-gray-500 tracking-widest uppercase mb-2 block">2023</span>
+                <h3 class="font-display text-5xl md:text-7xl mb-4 text-[#fffafb]">PRINT COLLATERAL</h3>
+                <p class="text-sm text-[#339989] uppercase tracking-wider">Brochures / Flyers</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Work 2 -->
+          <div class="panel">
+            <div class="flex flex-col md:flex-row-reverse items-center max-w-6xl w-full gap-20 mt-12">
+              <div class="w-full md:w-1/2 flex justify-center md:justify-start">
+                <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1000&auto=format&fit=crop" class="panel-img rounded-2xl" alt="Mobile app UI/UX" loading="lazy" />
+              </div>
+              <div class="w-full md:w-1/2 text-right md:text-left">
+                <span class="text-xs text-gray-500 tracking-widest uppercase mb-2 block">2022</span>
+                <h3 class="font-display text-5xl md:text-7xl mb-4 text-[#fffafb]">APP UI/UX</h3>
+                <p class="text-sm text-[#339989] uppercase tracking-wider">Mobile Interface</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Work 3 -->
+          <div class="panel">
+            <div class="flex flex-col md:flex-row items-center max-w-6xl w-full gap-20 mt-12">
+              <div class="w-full md:w-1/2 flex justify-center md:justify-end">
+                <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=1000&auto=format&fit=crop" class="panel-img rounded-2xl" alt="Merchandise design: apparel and ID cards" loading="lazy" />
+              </div>
+              <div class="w-full md:w-1/2">
+                <span class="text-xs text-gray-500 tracking-widest uppercase mb-2 block">2022</span>
+                <h3 class="font-display text-5xl md:text-7xl mb-4 text-[#fffafb]">MERCHANDISE</h3>
+                <p class="text-sm text-[#339989] uppercase tracking-wider">Apparel / ID Cards</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-progress-container">
+          <div class="section-progress-bar"></div>
+        </div>
+      </section>
+
+      <!-- FOOTER / CONTACT -->
+      <footer id="contact" class="h-screen flex flex-col justify-center items-center relative z-10 bg-[#131515]">
+        <div class="flex flex-col items-center justify-center relative z-20 w-full pt-5">
+          <a href="mailto:rajatavenue@gmail.com" class="glitter-text font-display text-[15vw] md:text-[18vw] leading-none hover:scale-105 transition-transform duration-500 cursor-pointer">
+            THANK YOU
+          </a>
+
+          <p class="text-xs uppercase tracking-[0.3em] mt-4 mb-4 text-[#7de2d1]">Got a project?</p>
+
+          <a href="mailto:rajatavenue@gmail.com" class="water-fill-btn flex items-center gap-4 text-white hover:text-white transition-colors mb-0 group border border-[#2b2c28] px-8 py-4 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:scale-110 transition-transform">
+              <rect width="20" height="16" x="2" y="4" rx="2" />
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+            </svg>
+            <span class="text-lg tracking-wider">rajatavenue@gmail.com</span>
+          </a>
+        </div>
+
+        <div class="absolute bottom-10 w-full px-6 md:px-20 flex justify-between text-xs uppercase tracking-wider text-[#2b2c28]">
+          <span>© 2025 Rajat Singh</span>
+          <div class="flex gap-6">
+            <a href="#" class="hover:text-white">LinkedIn</a>
+            <a href="#" class="hover:text-white">Behance</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>

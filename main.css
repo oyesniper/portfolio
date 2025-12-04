@@ -1,0 +1,404 @@
+:root {
+  /* NEW COLOR THEME */
+  --onyx: #131515;
+  --graphite: #2b2c28;
+  --verdigris: #339989;
+  --pearl-aqua: #7de2d1;
+  --snow: #fffafb;
+
+  --bg-dark: var(--onyx);
+  --text-light: var(--snow);
+  --accent: var(--verdigris);
+  --accent-glow: var(--pearl-aqua);
+  --header-height: 40px;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+  font-family: 'Manrope', sans-serif;
+  overflow: hidden; /* Lenis handles scrolling */
+  cursor: none; /* default for precise pointers */
+}
+
+/* Fallback class for touch / coarse pointer devices */
+body.no-custom-cursor {
+  cursor: auto;
+}
+
+body.no-custom-cursor #cursor {
+  display: none;
+}
+
+/* Typography */
+.font-display {
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+}
+
+/* Custom Cursor */
+#cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--pearl-aqua);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s, background-color 0.3s, border-color 0.3s;
+  mix-blend-mode: difference;
+}
+
+#cursor.hovered {
+  width: 50px;
+  height: 50px;
+  background-color: var(--snow);
+  border-color: transparent;
+  mix-blend-mode: difference;
+}
+
+/* WebGL Background Container (Layer 1 - Behind Content) */
+#canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+/* Feather / Plane Container (Layer 2 - Above Content) */
+#feather-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 60; /* Above Navbar (50) and Content */
+  pointer-events: none; /* Let clicks pass through */
+}
+
+/* Preloader */
+.preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--onyx);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.loader-bar {
+  width: 200px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  margin-top: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.loader-progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: var(--snow);
+}
+
+/* Horizontal Scroll Base Styles */
+.horizontal-section {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.horizontal-wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+  height: 100%;
+  align-items: center;
+}
+
+.panel {
+  width: 100vw;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+  flex-shrink: 0;
+  padding: 100px 2rem 0 2rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--onyx);
+}
+
+.panel-img {
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  filter: grayscale(100%);
+  transition: filter 0.5s ease;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  border-radius: 1rem;
+}
+
+.panel:hover .panel-img {
+  filter: grayscale(0%);
+}
+
+/* Section Specific Horizontal Progress Bar */
+.section-progress-container {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 20;
+}
+
+.section-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+}
+
+/* Career & Skills Path Styles */
+.career-section,
+.skills-section {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+/* Container for title + progress + timeline */
+.career-content-block,
+.skills-content-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+}
+
+.career-timeline-container,
+.skills-timeline-container {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding-left: 10vw;
+  margin-top: 3rem;
+}
+
+.career-node,
+.skills-node {
+  flex-shrink: 0;
+  width: 80vw;
+  max-width: 500px;
+  margin-right: 10vw;
+  position: relative;
+}
+
+/* Utility */
+.line-mask {
+  overflow: hidden;
+}
+
+.line-mask span {
+  display: block;
+  transform: translateY(100%);
+}
+
+/* NAVIGATION STYLES */
+nav {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: background 0.5s ease, backdrop-filter 0.5s ease;
+}
+
+nav.scrolled {
+  background: rgba(19, 21, 21, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.nav-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* Global Progress Bar */
+.global-progress-container {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+nav.scrolled .global-progress-container {
+  opacity: 1;
+}
+
+.global-progress-bar {
+  height: 2px;
+  width: 0%;
+  background: var(--accent);
+  box-shadow: 0 0 15px var(--accent);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.header-title-container {
+  height: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.header-title-text {
+  display: block;
+  line-height: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--snow);
+}
+
+/* Highlight Text Styles */
+.reveal-type span {
+  transition: color 0.1s;
+}
+
+.intro-text p {
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  line-height: 1.4;
+}
+
+.section-label {
+  will-change: transform, opacity;
+  color: var(--accent);
+}
+
+/* Fixed Section Headers (if needed) */
+.fixed-section-header {
+  position: absolute;
+  top: 120px;
+  left: 6vw;
+  z-index: 30;
+  pointer-events: none;
+}
+
+/* Text Filling Animation Styles */
+.fill-text-wrapper {
+  position: relative;
+  display: inline-block;
+  color: var(--graphite);
+}
+
+.fill-text-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 100%;
+  color: var(--snow);
+  overflow: hidden;
+  white-space: nowrap;
+  transition: width 0.1s linear;
+}
+
+/* Glitter Animation for Footer */
+.glitter-text {
+  background: linear-gradient(
+    to right,
+    var(--graphite) 0%,
+    var(--snow) 40%,
+    var(--snow) 60%,
+    var(--graphite) 100%
+  );
+  background-size: 200% auto;
+  color: var(--graphite);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: glitter-shine 4s linear infinite;
+  display: inline-block;
+}
+
+@keyframes glitter-shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/* Water Fill Animation for Button */
+.water-fill-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.water-fill-btn::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 0%;
+  background-color: var(--accent);
+  transition: height 0.4s ease-in-out;
+  z-index: 0;
+}
+
+.water-fill-btn:hover::before {
+  height: 100%;
+}
+
+.water-fill-btn span,
+.water-fill-btn svg {
+  position: relative;
+  z-index: 1;
+}
+
+/* Accessible focus styles */
+:focus-visible {
+  outline: 2px solid var(--pearl-aqua);
+  outline-offset: 3px;
+}
+
+a:focus-visible,
+button:focus-visible {
+  border-radius: 4px;
+}
