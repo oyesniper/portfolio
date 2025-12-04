@@ -23,6 +23,11 @@ const CONFIG = {
 
 let isHorizontalSection = false;
 
+// Simple mouse state (we'll feed this into THREE later)
+const mouse = { x: 0.5, y: 0.5 };
+let isMouseActive = false;
+let mouseActiveTimeout = null;
+
 // --- CUSTOM CURSOR FALLBACK FOR TOUCH / COARSE POINTER ---
 (function () {
   const mq = window.matchMedia && window.matchMedia('(pointer: coarse)');
@@ -43,7 +48,7 @@ let isHorizontalSection = false;
 })();
 
 // Ensure GSAP/ScrollTrigger are available
-if (typeof gsap !== 'undefined') {
+if (window.gsap && window.ScrollTrigger) {
   gsap.registerPlugin(ScrollTrigger);
 }
 
@@ -52,53 +57,60 @@ const preloader = document.querySelector('.preloader');
 const counter = document.getElementById('counter');
 const progress = document.querySelector('.loader-progress');
 
-let count = 0;
-const interval = setInterval(() => {
-  count += Math.floor(Math.random() * 5) + 1;
-  if (count > 100) count = 100;
+if (preloader && counter && progress) {
+  let count = 0;
+  const interval = setInterval(() => {
+    count += Math.floor(Math.random() * 5) + 1;
+    if (count > 100) count = 100;
 
-  counter.innerText = count + '%';
-  progress.style.width = count + '%';
+    counter.innerText = count + '%';
+    progress.style.width = count + '%';
 
-  if (count === 100) {
-    clearInterval(interval);
-    revealSite();
+    if (count === 100) {
+      clearInterval(interval);
+      revealSite();
+    }
+  }, 30);
+
+  function revealSite() {
+    if (!window.gsap) {
+      preloader.style.display = 'none';
+      return;
+    }
+
+    const tl = gsap.timeline();
+
+    tl.to('.preloader', {
+      yPercent: -100,
+      duration: 1.2,
+      ease: 'power4.inOut'
+    })
+      .to(
+        '#canvas-container',
+        { opacity: 1, duration: 1 },
+        '-=0.5'
+      )
+      .to(
+        '.hero-line',
+        {
+          y: 0,
+          duration: 1.5,
+          stagger: 0.1,
+          ease: 'power4.out'
+        },
+        '-=0.8'
+      )
+      .to(
+        '.hero-fade',
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          ease: 'power2.out'
+        },
+        '-=1'
+      );
   }
-}, 30);
-
-function revealSite() {
-  const tl = gsap.timeline();
-
-  tl.to('.preloader', {
-    yPercent: -100,
-    duration: 1.2,
-    ease: 'power4.inOut'
-  })
-    .to(
-      '#canvas-container',
-      { opacity: 1, duration: 1 },
-      '-=0.5'
-    )
-    .to(
-      '.hero-line',
-      {
-        y: 0,
-        duration: 1.5,
-        stagger: 0.1,
-        ease: 'power4.out'
-      },
-      '-=0.8'
-    )
-    .to(
-      '.hero-fade',
-      {
-        y: 0,
-        opacity: 1,
-        duration: 1,
-        ease: 'power2.out'
-      },
-      '-=1'
-    );
 }
 
 // --- 2. SMOOTH SCROLL (LENIS) ---
@@ -120,20 +132,22 @@ if (typeof Lenis !== 'undefined' && !isCoarsePointer) {
   }
   requestAnimationFrame(raf);
 
-  lenis.on('scroll', ScrollTrigger.update);
-  gsap.ticker.add((time) => {
-    lenis.raf(time * 1000);
-  });
-  gsap.ticker.lagSmoothing(0);
+  if (window.ScrollTrigger) {
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+  }
 } else {
   console.warn('Lenis disabled on this device (coarse pointer or not loaded). Using native scroll.');
-  // Make absolutely sure scrolling works
   document.body.style.overflowY = 'auto';
 }
 
 // --- 3. HEADER BLUR ON SCROLL ---
 const nav = document.querySelector('nav');
 window.addEventListener('scroll', () => {
+  if (!nav) return;
   if (window.scrollY > 50) {
     nav.classList.add('scrolled');
   } else {
@@ -142,135 +156,61 @@ window.addEventListener('scroll', () => {
 });
 
 // --- 4. INTRO SCROLL PINNING & TEXT HIGHLIGHT ---
-const revealTypes = document.querySelectorAll('.reveal-type');
+if (window.gsap && window.ScrollTrigger) {
+  const revealTypes = document.querySelectorAll('.reveal-type');
 
-revealTypes.forEach((text) => {
-  const content = text.textContent;
-  text.innerHTML = '';
-  const words = content.split(' ').filter((word) => word.length > 0);
-  words.forEach((word) => {
-    const span = document.createElement('span');
-    span.textContent = word + ' ';
-    span.style.opacity = '0.2';
-    text.appendChild(span);
+  revealTypes.forEach((text) => {
+    const content = text.textContent;
+    text.innerHTML = '';
+    const words = content.split(' ').filter((word) => word.length > 0);
+    words.forEach((word) => {
+      const span = document.createElement('span');
+      span.textContent = word + ' ';
+      span.style.opacity = '0.2';
+      text.appendChild(span);
+    });
   });
-});
 
-const allSpans = document.querySelectorAll('.reveal-type span');
+  const allSpans = document.querySelectorAll('.reveal-type span');
 
-gsap.to(allSpans, {
-  color: '#fffafb',
-  opacity: 1,
-  stagger: 0.1,
-  scrollTrigger: {
-    trigger: '#intro',
-    pin: true,
-    start: 'top top',
-    end: '+=150%',
-    scrub: 1
-  }
-});
+  gsap.to(allSpans, {
+    color: '#fffafb',
+    opacity: 1,
+    stagger: 0.1,
+    scrollTrigger: {
+      trigger: '#intro',
+      pin: true,
+      start: 'top top',
+      end: '+=150%',
+      scrub: 1
+    }
+  });
+}
 
 // --- 5. CAREER PATH SCROLL LOGIC ---
-const careerSection = document.querySelector('.career-section');
-const careerWrapper = document.querySelector('.career-timeline-container');
-const careerProgress = document.querySelector('.career-progress-bar');
+if (window.gsap && window.ScrollTrigger) {
+  const careerSection = document.querySelector('.career-section');
+  const careerWrapper = document.querySelector('.career-timeline-container');
+  const careerProgress = document.querySelector('.career-progress-bar');
 
-if (careerSection && careerWrapper) {
-  const careerScrollDist =
-    careerWrapper.scrollWidth - window.innerWidth + 200;
+  if (careerSection && careerWrapper) {
+    const careerScrollDist =
+      careerWrapper.scrollWidth - window.innerWidth + 200;
 
-  gsap.to(careerWrapper, {
-    x: -careerScrollDist,
-    ease: 'none',
-    scrollTrigger: {
-      trigger: careerSection,
-      pin: true,
-      start: 'top top',
-      scrub: 1,
-      end: () =>
-        '+=' +
-        careerScrollDist * CONFIG.scroll.careerSpeedMultiplier,
-      onUpdate: (self) => {
-        if (careerProgress) {
-          gsap.to(careerProgress, {
-            width: self.progress * 100 + '%',
-            duration: 0.1,
-            ease: 'none'
-          });
-        }
-      }
-    }
-  });
-}
-
-// --- 6. SKILLS SCROLL LOGIC ---
-const skillsSection = document.querySelector('.skills-section');
-const skillsWrapper = document.querySelector('.skills-timeline-container');
-const skillsProgress = document.querySelector('.skills-progress-bar');
-
-if (skillsSection && skillsWrapper) {
-  const skillsScrollDist =
-    skillsWrapper.scrollWidth - window.innerWidth + 200;
-
-  gsap.to(skillsWrapper, {
-    x: -skillsScrollDist,
-    ease: 'none',
-    scrollTrigger: {
-      trigger: skillsSection,
-      pin: true,
-      start: 'top top',
-      scrub: 1,
-      end: () =>
-        '+=' +
-        skillsScrollDist * CONFIG.scroll.skillsSpeedMultiplier,
-      onUpdate: (self) => {
-        if (skillsProgress) {
-          gsap.to(skillsProgress, {
-            width: self.progress * 100 + '%',
-            duration: 0.1,
-            ease: 'none'
-          });
-        }
-      }
-    }
-  });
-}
-
-// --- 7. HORIZONTAL SCROLL LOGIC (SHOWCASE & ARCHIVE) ---
-const horizontalSections = gsap.utils.toArray('.horizontal-section');
-
-horizontalSections.forEach((section) => {
-  const wrapper = section.querySelector('.horizontal-wrapper');
-  const panels = gsap.utils.toArray('.panel', section);
-  const progressBar = section.querySelector('.section-progress-bar');
-
-  const scrollDistance = section.offsetWidth * (panels.length - 1);
-
-  if (wrapper) {
-    const tween = gsap.to(wrapper, {
-      xPercent: (-100 * (panels.length - 1)) / panels.length,
+    gsap.to(careerWrapper, {
+      x: -careerScrollDist,
       ease: 'none',
       scrollTrigger: {
-        trigger: section,
+        trigger: careerSection,
         pin: true,
         start: 'top top',
         scrub: 1,
-        snap: {
-          snapTo: 1 / (panels.length - 1),
-          duration: 0.6,
-          delay: 0.1,
-          ease: 'circ.out'
-        },
         end: () =>
           '+=' +
-          scrollDistance * CONFIG.scroll.horizontalSpeedMultiplier,
-        onToggle: (self) => {
-          isHorizontalSection = self.isActive;
-        },
+          careerScrollDist * CONFIG.scroll.careerSpeedMultiplier,
         onUpdate: (self) => {
-          if (progressBar) {
-            gsap.to(progressBar, {
+          if (careerProgress) {
+            gsap.to(careerProgress, {
               width: self.progress * 100 + '%',
               duration: 0.1,
               ease: 'none'
@@ -279,44 +219,123 @@ horizontalSections.forEach((section) => {
         }
       }
     });
+  }
 
-    // TRIGGER TEXT FILL ANIMATION FOR BOTH SHOWCASE AND ARCHIVE
-    const fillOverlay = section.querySelector('.fill-text-overlay');
-    if (fillOverlay) {
-      gsap.to(fillOverlay, {
-        width: '100%',
-        duration: 1.5,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: section,
-          start: 'top 60%',
-          toggleActions: 'play none none reverse'
-        }
-      });
-    }
+  // --- 6. SKILLS SCROLL LOGIC ---
+  const skillsSection = document.querySelector('.skills-section');
+  const skillsWrapper = document.querySelector('.skills-timeline-container');
+  const skillsProgress = document.querySelector('.skills-progress-bar');
 
-    panels.forEach((panel) => {
-      const img = panel.querySelector('img');
-      if (img) {
-        gsap.to(img, {
-          xPercent: 15,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: panel,
-            containerAnimation: tween,
-            scrub: true
+  if (skillsSection && skillsWrapper) {
+    const skillsScrollDist =
+      skillsWrapper.scrollWidth - window.innerWidth + 200;
+
+    gsap.to(skillsWrapper, {
+      x: -skillsScrollDist,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: skillsSection,
+        pin: true,
+        start: 'top top',
+        scrub: 1,
+        end: () =>
+          '+=' +
+          skillsScrollDist * CONFIG.scroll.skillsSpeedMultiplier,
+        onUpdate: (self) => {
+          if (skillsProgress) {
+            gsap.to(skillsProgress, {
+              width: self.progress * 100 + '%',
+              duration: 0.1,
+              ease: 'none'
+            });
           }
-        });
+        }
       }
     });
   }
-});
+
+  // --- 7. HORIZONTAL SCROLL LOGIC (SHOWCASE & ARCHIVE) ---
+  const horizontalSections = gsap.utils.toArray('.horizontal-section');
+
+  horizontalSections.forEach((section) => {
+    const wrapper = section.querySelector('.horizontal-wrapper');
+    const panels = gsap.utils.toArray('.panel', section);
+    const progressBar = section.querySelector('.section-progress-bar');
+
+    const scrollDistance = section.offsetWidth * (panels.length - 1);
+
+    if (wrapper) {
+      const tween = gsap.to(wrapper, {
+        xPercent: (-100 * (panels.length - 1)) / panels.length,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          pin: true,
+          start: 'top top',
+          scrub: 1,
+          snap: {
+            snapTo: 1 / (panels.length - 1),
+            duration: 0.6,
+            delay: 0.1,
+            ease: 'circ.out'
+          },
+          end: () =>
+            '+=' +
+            scrollDistance * CONFIG.scroll.horizontalSpeedMultiplier,
+          onToggle: (self) => {
+            isHorizontalSection = self.isActive;
+          },
+          onUpdate: (self) => {
+            if (progressBar) {
+              gsap.to(progressBar, {
+                width: self.progress * 100 + '%',
+                duration: 0.1,
+                ease: 'none'
+              });
+            }
+          }
+        }
+      });
+
+      // TRIGGER TEXT FILL ANIMATION FOR BOTH SHOWCASE AND ARCHIVE
+      const fillOverlay = section.querySelector('.fill-text-overlay');
+      if (fillOverlay) {
+        gsap.to(fillOverlay, {
+          width: '100%',
+          duration: 1.5,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 60%',
+            toggleActions: 'play none none reverse'
+          }
+        });
+      }
+
+      panels.forEach((panel) => {
+        const img = panel.querySelector('img');
+        if (img) {
+          gsap.to(img, {
+            xPercent: 15,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: panel,
+              containerAnimation: tween,
+              scrub: true
+            }
+          });
+        }
+      });
+    }
+  });
+}
 
 // --- 8. DYNAMIC HEADER SYNC ---
 const headerText = document.getElementById('dynamic-header');
 const pageProgressBar = document.getElementById('page-progress');
 
 function updateHeader(title) {
+  if (!window.gsap || !headerText) return;
   if (headerText.innerText !== title) {
     gsap.killTweensOf(headerText);
     gsap.to(headerText, {
@@ -337,6 +356,7 @@ function updateHeader(title) {
 }
 
 function toggleSectionLabel(sectionId, show) {
+  if (!window.gsap) return;
   const label = document.querySelector(`#${sectionId} .section-label`);
   if (label) {
     gsap.killTweensOf(label);
@@ -360,69 +380,76 @@ function toggleSectionLabel(sectionId, show) {
   }
 }
 
-const sections = [
-  { id: 'hero', title: 'RAJAT SINGH' },
-  { id: 'intro', title: 'INTRODUCTION' },
-  { id: 'experience', title: 'EXPERIENCE' },
-  { id: 'skills', title: 'SKILLS' },
-  { id: 'showcase', title: 'SHOWCASE' },
-  { id: 'work', title: 'ARCHIVE' },
-  { id: 'contact', title: 'CONTACT' }
-];
+if (window.ScrollTrigger) {
+  const sections = [
+    { id: 'hero', title: 'RAJAT SINGH' },
+    { id: 'intro', title: 'INTRODUCTION' },
+    { id: 'experience', title: 'EXPERIENCE' },
+    { id: 'skills', title: 'SKILLS' },
+    { id: 'showcase', title: 'SHOWCASE' },
+    { id: 'work', title: 'ARCHIVE' },
+    { id: 'contact', title: 'CONTACT' }
+  ];
 
-ScrollTrigger.refresh();
+  ScrollTrigger.refresh();
 
-sections.forEach((section, i) => {
-  ScrollTrigger.create({
-    trigger: `#${section.id}`,
-    start: 'top top',
-    end: 'bottom top',
-    onEnter: () => {
-      updateHeader(section.title);
-      toggleSectionLabel(section.id, false);
-    },
-    onEnterBack: () => {
-      updateHeader(section.title);
-      toggleSectionLabel(section.id, false);
-    },
-    onLeaveBack: () => {
-      toggleSectionLabel(section.id, true);
-      if (i > 0) {
-        updateHeader(sections[i - 1].title);
+  sections.forEach((section, i) => {
+    ScrollTrigger.create({
+      trigger: `#${section.id}`,
+      start: 'top top',
+      end: 'bottom top',
+      onEnter: () => {
+        updateHeader(section.title);
+        toggleSectionLabel(section.id, false);
+      },
+      onEnterBack: () => {
+        updateHeader(section.title);
+        toggleSectionLabel(section.id, false);
+      },
+      onLeaveBack: () => {
+        toggleSectionLabel(section.id, true);
+        if (i > 0) {
+          updateHeader(sections[i - 1].title);
+        }
       }
-    }
+    });
   });
-});
 
-// --- 9. GLOBAL PROGRESS BAR ---
-gsap.to(pageProgressBar, {
-  width: '100%',
-  ease: 'none',
-  scrollTrigger: {
-    trigger: document.documentElement,
-    start: 'top top',
-    end: 'bottom bottom',
-    scrub: 0
+  // --- 9. GLOBAL PROGRESS BAR ---
+  if (pageProgressBar) {
+    gsap.to(pageProgressBar, {
+      width: '100%',
+      ease: 'none',
+      scrollTrigger: {
+        trigger: document.documentElement,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 0
+      }
+    });
   }
-});
+}
 
 // --- 10. CUSTOM CURSOR & BG ---
 const cursor = document.getElementById('cursor');
-// Mouse vector for Three.js (0 to 1 range)
-const mouse = new THREE.Vector2();
 
 window.addEventListener('mousemove', (e) => {
+  // track mouse activity for plane steering
+  isMouseActive = true;
+  clearTimeout(mouseActiveTimeout);
+  mouseActiveTimeout = setTimeout(() => {
+    isMouseActive = false;
+  }, 150);
+
+  // update mouse normalized coords for 3D
+  mouse.x = e.clientX / window.innerWidth;
+  mouse.y = e.clientY / window.innerHeight;
+
+  if (!cursor || !window.gsap) return;
   gsap.to(cursor, {
     x: e.clientX,
     y: e.clientY,
     duration: 0.1,
-    ease: 'power2.out'
-  });
-  // Update mouse vector for Three.js animations
-  gsap.to(mouse, {
-    x: e.clientX / window.innerWidth,
-    y: e.clientY / window.innerHeight,
-    duration: 0.5,
     ease: 'power2.out'
   });
 });
@@ -432,10 +459,12 @@ const interactiveElements = document.querySelectorAll(
 );
 interactiveElements.forEach((el) => {
   el.addEventListener('mouseenter', () => {
+    if (!cursor || !window.gsap) return;
     cursor.classList.add('hovered');
     gsap.to(cursor, { scale: 0.5, duration: 0.3 });
   });
   el.addEventListener('mouseleave', () => {
+    if (!cursor || !window.gsap) return;
     cursor.classList.remove('hovered');
     gsap.to(cursor, { scale: 1, duration: 0.3 });
   });
@@ -743,41 +772,29 @@ function init3D() {
 
   const currentQuaternion = new THREE.Quaternion();
 
-  let isMouseMoving = false;
-  let isScrolling = false;
   let scrollVelocity = 0;
   let lastScrollY = window.scrollY;
-  let mouseStopTimeout;
-
-  window.addEventListener('mousemove', () => {
-    isMouseMoving = true;
-    clearTimeout(mouseStopTimeout);
-    mouseStopTimeout = setTimeout(() => {
-      isMouseMoving = false;
-    }, 100);
-  });
-
-  window.addEventListener('scroll', () => {
-    isScrolling = true;
-    clearTimeout(window.scrollTimeout);
-    window.scrollTimeout = setTimeout(() => (isScrolling = false), 150);
-  });
 
   const introProxy = { x: -15, y: 10, z: 0 };
-  gsap.to(introProxy, {
-    x: 0,
-    y: 0,
-    z: 0,
-    duration: 4.0,
-    ease: 'power2.out',
-    onUpdate: () => {
-      position.set(introProxy.x, introProxy.y, introProxy.z);
-      velocity.set(1, -0.2, 0).normalize().multiplyScalar(0.2);
-    },
-    onComplete: () => {
-      isIntroAnimating = false;
-    }
-  });
+  if (window.gsap) {
+    gsap.to(introProxy, {
+      x: 0,
+      y: 0,
+      z: 0,
+      duration: 4.0,
+      ease: 'power2.out',
+      onUpdate: () => {
+        position.set(introProxy.x, introProxy.y, introProxy.z);
+        velocity.set(1, -0.2, 0).normalize().multiplyScalar(0.2);
+      },
+      onComplete: () => {
+        isIntroAnimating = false;
+      }
+    });
+  } else {
+    position.set(0, 0, 0);
+    isIntroAnimating = false;
+  }
 
   function applyForce(force) {
     acceleration.add(force);
@@ -799,15 +816,14 @@ function init3D() {
     return steer;
   }
 
-  // Figure-8 flight path around center
-  function flightPattern(time, maxSpeed, maxForce) {
+  // Flight target (center path)
+  function getFlightTarget(time) {
     const t = time * 0.4;
-    const target = new THREE.Vector3(
-      Math.sin(t) * 5.0,          // a bit tighter horizontally
-      Math.sin(t * 2.0) * 2.5,    // a bit tighter vertically
-      Math.cos(t) * 4.0 - 4.0     // around z ≈ -4
+    return new THREE.Vector3(
+      Math.sin(t) * 5.0,          // horizontal radius
+      Math.sin(t * 2.0) * 2.5,    // vertical radius
+      Math.cos(t) * 4.0 - 4.0     // depth
     );
-    return seek(target, maxSpeed, maxForce);
   }
 
   function boundaries(d, maxSpeed, maxForce) {
@@ -844,50 +860,59 @@ function init3D() {
   const clock = new THREE.Clock();
   let shaderTime = 0;
   let flightTime = 0;
+  const mouseVec = new THREE.Vector2(0.5, 0.5);
 
   function animate() {
     const dt = clock.getDelta();
     shaderTime += dt;
 
     // Update BG Shader
+    mouseVec.set(mouse.x, mouse.y);
     bgMaterial.uniforms.uTime.value = shaderTime;
-    bgMaterial.uniforms.uMouse.value = mouse;
+    bgMaterial.uniforms.uMouse.value = mouseVec;
 
-    // Scroll data only used for speed, not position
+    // Scroll data only used for speed, not for position
     const currentScrollY = window.scrollY;
     const rawVel = currentScrollY - lastScrollY;
-    scrollVelocity += (rawVel - scrollVelocity) * 0.2; // smooth scroll velocity
+    scrollVelocity += (rawVel - scrollVelocity) * 0.2;
     lastScrollY = currentScrollY;
 
     const normalizedScroll = Math.min(
       1,
       Math.abs(scrollVelocity) / 40
-    ); // tune divisor if needed
+    );
     const speedFactor =
-      1 + CONFIG.flight.scrollBoost * normalizedScroll; // 1..(1+scrollBoost)
+      1 + CONFIG.flight.scrollBoost * normalizedScroll;
 
     // Advance flight time based on scroll-influenced speed
     flightTime += dt * CONFIG.flight.baseSpeed * speedFactor;
 
     // --- PHYSICS ENGINE ---
     if (!isIntroAnimating) {
-      let maxSpeed = CONFIG.physics.idleMaxSpeed;
-      let maxForce = CONFIG.physics.idleMaxForce;
+      const baseMaxSpeed = CONFIG.physics.idleMaxSpeed;
+      const baseMaxForce = CONFIG.physics.idleMaxForce;
+      const boostedMaxSpeed = CONFIG.physics.activeMaxSpeed;
+      const boostedMaxForce = CONFIG.physics.activeMaxForce;
+
+      const maxSpeed = isMouseActive ? boostedMaxSpeed : baseMaxSpeed;
+      const maxForce = isMouseActive ? boostedMaxForce : baseMaxForce;
 
       // 1) Base looping flight around center
-      const patternForce = flightPattern(flightTime, maxSpeed, maxForce);
-      applyForce(patternForce);
+      const patternTarget = getFlightTarget(flightTime);
+      let target = patternTarget.clone();
 
-      // 2) Gentle steering to mouse when moving
-      if (isMouseMoving) {
-        const mouseTarget = new THREE.Vector3(
-          (mouse.x - 0.5) * 6,   // small influence horizontally
-          -(mouse.y - 0.5) * 3,  // small influence vertically
+      // 2) Add gentle mouse steering around that path
+      if (isMouseActive) {
+        const mouseOffset = new THREE.Vector3(
+          (mouse.x - 0.5) * 6,   // small horizontal steering
+          -(mouse.y - 0.5) * 3,  // small vertical steering
           0
         );
-        const mouseForce = seek(mouseTarget, maxSpeed, maxForce * 0.5);
-        applyForce(mouseForce);
+        target.add(mouseOffset.multiplyScalar(0.4)); // blend strength
       }
+
+      const moveForce = seek(target, maxSpeed, maxForce);
+      applyForce(moveForce);
 
       // 3) Soft boundaries so it stays on-screen
       const safetyForce = boundaries(1.0, maxSpeed * 1.2, 0.05);
@@ -962,5 +987,7 @@ function schedule3DInit() {
 
 window.addEventListener('load', () => {
   schedule3DInit();
-  ScrollTrigger.refresh();
+  if (window.ScrollTrigger) {
+    ScrollTrigger.refresh();
+  }
 });
