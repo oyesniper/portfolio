@@ -875,21 +875,29 @@ function init3D() {
         let target = new THREE.Vector3();
 
         if (isMouseMoving) {
+          // Follow Mouse (same as before)
           target.set(
             (mouse.x - 0.5) * 16,
             -(mouse.y - 0.5) * 10,
             0
           );
         } else {
+          // Scroll Influence (much smoother, stays around middle)
           const scrollPercent =
-            currentScrollY / (document.body.scrollHeight - window.innerHeight);
-          const depthZ = -scrollPercent * 10.0;
+            currentScrollY / (document.body.scrollHeight - window.innerHeight || 1);
 
-          target.set(
-            position.x * 0.95,
-            position.y - scrollVelocity * 2.0,
-            depthZ
-          );
+          // Limit depth change so it doesn't feel too wild
+          const depthZ = THREE.MathUtils.lerp(-2, -10, scrollPercent);
+
+          // Slowly bring Y toward center (0), with a *very* gentle scroll influence
+          const targetYBase = THREE.MathUtils.lerp(position.y, 0, 0.05);
+          const targetYWithScroll = targetYBase - scrollVelocity * 0.05;
+          const clampedY = THREE.MathUtils.clamp(targetYWithScroll, -2.5, 2.5);
+
+          // X gently recenters too (subtle)
+          const targetX = THREE.MathUtils.lerp(position.x, 0, 0.02);
+
+          target.set(targetX, clampedY, depthZ);
         }
 
         const seekForce = seek(target, maxSpeed, maxForce);
@@ -967,3 +975,4 @@ window.addEventListener('load', () => {
   schedule3DInit();
   ScrollTrigger.refresh();
 });
+
